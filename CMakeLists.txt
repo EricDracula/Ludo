@@ -88,6 +88,12 @@ add_executable(microbenchmarks
         ${COMMON_SOURCE_FILES}
         microbenchmarks.cpp)
 
+# add_executable(ludo
+add_library(ludo SHARED
+        ${HEADER_FILES}
+        ${COMMON_SOURCE_FILES}
+        ludo.cpp)
+
 add_executable(sideExperiments
         ${HEADER_FILES}
         ${COMMON_SOURCE_FILES}
@@ -112,12 +118,14 @@ set(Gperftools_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 find_package(Gperftools REQUIRED)
 target_link_libraries(validity ${GPERFTOOLS_PROFILER})
 target_link_libraries(microbenchmarks ${GPERFTOOLS_PROFILER})
+target_link_libraries(ludo ${GPERFTOOLS_PROFILER})
 target_link_libraries(sideExperiments ${GPERFTOOLS_PROFILER})
 
 find_package(PkgConfig REQUIRED)
 pkg_search_module(OPENSSL REQUIRED openssl)
 target_link_libraries(validity ${OPENSSL_LIBRARIES})
 target_link_libraries(microbenchmarks ${OPENSSL_LIBRARIES})
+target_link_libraries(ludo ${OPENSSL_LIBRARIES})
 target_link_libraries(sideExperiments ${OPENSSL_LIBRARIES})
 
 #TARGET_LINK_LIBRARIES(dynamic_benchmarks LINK_PUBLIC ${Boost_LIBRARIES})

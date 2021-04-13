@@ -58,7 +58,8 @@ public:
   vector<uint64_t> mem;        // memory space for array A and array B. All elements are stored compactly into consecutive uint64_t
   uint32_t ma = 0;               // number of elements of array A
   uint32_t mb = 0;               // number of elements of array B
-  Hasher64<K> hab = Hasher64<K>((uint64_t(rand()) << 32) | rand());          // hash function Ha
+  // Hasher64<K> hab = Hasher64<K>((uint64_t(rand()) << 32) | rand());          // hash function Ha
+  OthelloHasher64<K> hab = OthelloHasher64<K>((uint64_t(rand()) << 32) | rand());          // hash function Ha
   Hasher32<K> hd = Hasher32<K>(uint32_t(rand()));
   
   bool maintainingDP = maintainDP;
@@ -76,15 +77,25 @@ public:
   }
   
   inline uint32_t fast_map_to_A(uint32_t x) const {
-    // Map x (uniform in 2^64) to the range [0, num_buckets_ -1]
-    // using Lemire's alternative to modulo reduction:
-    // http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-    // Instead of x % N, use (x * N) >> 64.
-    return multiply_high_u32(x, ma);
+    /* Next codes are original Ludo codes
+     * // Map x (uniform in 2^64) to the range [0, num_buckets_ -1]
+     * // using Lemire's alternative to modulo reduction:
+     * // http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
+     * // Instead of x % N, use (x * N) >> 64.
+     * return multiply_high_u32(x, ma);
+     */
+    /* We change the computing method back to the real modulo to be compatible
+     * with the programmable ASIC */
+    return x % ma;
   }
   
   inline uint32_t fast_map_to_B(uint32_t x) const {
-    return multiply_high_u32(x, mb);
+    /* Next codes are original Ludo codes
+     * return multiply_high_u32(x, mb);
+     */
+    /* We change the computing method back to the real modulo to be compatible
+     * with the programmable ASIC */
+    return x % mb;
   }
   
   /// \param k

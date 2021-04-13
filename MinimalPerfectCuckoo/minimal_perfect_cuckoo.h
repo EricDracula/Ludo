@@ -168,7 +168,8 @@ public:
     int tail_;
   };
 
-  FastHasher64<Key> h;   // the hash value is divided in half for two hashes
+  // FastHasher64<Key> h;   // the hash value is divided in half for two hashes
+  CRCHasher64<Key> h;   // the hash value is divided in half for two hashes
   uint32_t entryCount = 0;
 
   ControlPlaneOthello<Key, uint8_t, 1, 0, true> locator;
@@ -185,12 +186,18 @@ public:
   }
 
   inline void fast_map_to_buckets(uint64_t x, uint32_t *twoBuckets) const {
-    // Map x (uniform in 2^64) to the range [0, num_buckets_ -1]
-    // using Lemire's alternative to modulo reduction:
-    // http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-    // Instead of x % N, use (x * N) >> 64.
-    twoBuckets[0] = multiply_high_u32(x, buckets_.size());
-    twoBuckets[1] = multiply_high_u32(x >> 32, buckets_.size());
+    /* Next codes are original Ludo codes
+     * // Map x (uniform in 2^64) to the range [0, num_buckets_ -1]
+     * // using Lemire's alternative to modulo reduction:
+     * // http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
+     * // Instead of x % N, use (x * N) >> 64.
+     * twoBuckets[0] = multiply_high_u32(x, buckets_.size());
+     * twoBuckets[1] = multiply_high_u32(x >> 32, buckets_.size());
+     */
+    /* We change the computing method back to the real modulo to be compatible
+     * with the programmable ASIC */
+    twoBuckets[0] = (x & 0xFFFFFFFF) % buckets_.size();
+    twoBuckets[1] = ((x >> 32) & 0xFFFFFFFF) % buckets_.size();
   }
 
   // The key type is fixed as a pre-hashed key for this specialized use.
@@ -785,7 +792,8 @@ class DataPlaneMinimalPerfectCuckoo {
   static const uint64_t VDMask = (1ULL << (VL + DL)) - 1;
 
 public:
-  FastHasher64<Key> h;
+  // FastHasher64<Key> h;
+  CRCHasher64<Key> h;
   uint32_t num_buckets_;
 
   std::vector<uint64_t> memory;
@@ -1086,12 +1094,18 @@ public:
   }
 
   inline void fast_map_to_buckets(uint64_t x, uint32_t *twoBuckets) const {
-    // Map x (uniform in 2^64) to the range [0, num_buckets_ -1]
-    // using Lemire's alternative to modulo reduction:
-    // http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-    // Instead of x % N, use (x * N) >> 64.
-    twoBuckets[0] = multiply_high_u32(x, num_buckets_);
-    twoBuckets[1] = multiply_high_u32(x >> 32, num_buckets_);
+    /* Next codes are original Ludo codes
+     * // Map x (uniform in 2^64) to the range [0, num_buckets_ -1]
+     * // using Lemire's alternative to modulo reduction:
+     * // http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
+     * // Instead of x % N, use (x * N) >> 64.
+     * twoBuckets[0] = multiply_high_u32(x, num_buckets_);
+     * twoBuckets[1] = multiply_high_u32(x >> 32, num_buckets_);
+     */
+    /* We change the computing method back to the real modulo to be compatible
+     * with the programmable ASIC */
+    twoBuckets[0] = (x & 0xFFFFFFFF) % num_buckets_;
+    twoBuckets[1] = ((x >> 32) & 0xFFFFFFFF) % num_buckets_;
   }
 };
 
