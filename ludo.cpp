@@ -17,6 +17,7 @@ typedef uint8_t Val;
 
 void ludo() {
 // int main(int argc, char **argv) {
+    // srand((unsigned)time(NULL));
     ControlPlaneMinimalPerfectCuckoo<Key, Val, Vlen> cp(256);
     Key k = 128;
     Val v = 0;
@@ -33,18 +34,22 @@ void ludo() {
         cp.insert(i, i);
     }
 
+    cp.insert(0x0101a8c0, 66);
+
     cp.prepareToExport();
 
     DataPlaneMinimalPerfectCuckoo<Key, Val, Vlen> dp(cp);
 
     printf("Bucket number: %u\n", dp.num_buckets_);
+    printf("Cuckoo seed: 0x%02hx\n", *((uint8_t *)&dp.h.s));
+    printf("Othello seed: 0x%02hx\n", *((uint8_t *)&dp.locator.hab.s));
 
     uint32_t checksum = 0;
     for (int idx = 0; idx < dp.num_buckets_; idx++) {
         DataPlaneMinimalPerfectCuckoo<Key, Val, Vlen>::Bucket bucket;
         bucket = dp.readBucket(idx);
         printf(
-            "Bucket %5d -- Seed: 0x%05x -- Slots: %5u%5u%5u%5u\n", idx, bucket.seed,
+            "Bucket %5d -- Seed: 0x%02x -- Slots: %5u%5u%5u%5u\n", idx, bucket.seed,
             bucket.values[0], bucket.values[1], bucket.values[2], bucket.values[3]
         );
         checksum += bucket.values[0];

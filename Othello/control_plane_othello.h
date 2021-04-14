@@ -270,9 +270,12 @@ public:
     }
     
     if (nextMa > ma || nextMa < 0.8 * ma) {
-      ma = nextMa;
-      mb = nextMb;
-      
+      // ma = nextMa;
+      // mb = nextMb;
+      /* To avoid the modulo operation in ASIC, let num_buckets to be 2^N */
+      ma = pow(2, (int)ceil(log(nextMa)/log(2)));
+      mb = pow(2, (int)ceil(log(nextMb)/log(2)));
+
       memResize();
       
       indMem.resize((uint64_t) ma + mb);
@@ -864,7 +867,9 @@ public:
     if (keyCnt + 1 >= keys.size() || keyCnt >= mb) {
       if (DoNotRebuild) {
         throw runtime_error("Do not allow rebuild");
-      } else { resizeKey(keyCnt + 1); }
+      } else {
+        resizeKey(keyCnt + 1);
+      } 
     }
     keyCnt++;
     

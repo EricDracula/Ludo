@@ -289,8 +289,12 @@ public:
     const uint16_t keyByteLength = this -> template getKeyByteLength<K>(k0);
     uint32_t h[2];
     
-    h[0] = getCRC32C(base, keyByteLength, this->s);
-    h[1] = getCRC32D(base, keyByteLength, this->s);
+    // h[0] = getCRC32C(base, keyByteLength, this->s);
+    // h[1] = getCRC32D(base, keyByteLength, this->s);
+    h[0] = h[1] = this->getCRC32(base, keyByteLength, this->s);
+    h[0] ^= this->getCRC32C(base, keyByteLength, this->s);
+    h[1] ^= this->getCRC32D(base, keyByteLength, this->s);
+ 
     return *(uint64_t*)h;
   }
 };
@@ -341,8 +345,10 @@ public:
     h[0] = h[1] = this->getCRC32(base, keyByteLength, this->s);
     h[1] += this->getCRC32C(base, keyByteLength, this->s);
     h[1] += this->getCRC32D(base, keyByteLength, this->s);
-    // printf("Key: 0x%02x, Seed: 0x%08x, Hash: 0x%016lx, Slot: %lu\n", *(uint32_t *)base, this->s, *(uint64_t*)h, *(uint64_t*)h >> 62);
-    // printf("Key: 0x%02x, Seed: 0x%02x, Hash: 0x%016lx, Slot: %lu\n", *(uint8_t *)base, *((uint8_t *)&this->s), *(uint64_t*)h, *(uint64_t*)h >> 62);
+ 
+    if (k0 == 0x0101a8c0)
+      printf("Slot Locator - Key: 0x%08x, Seed: 0x%08x, Hash: 0x%016lx, Slot: %lu\n", k0, this->s, *(uint64_t*)h, *(uint64_t*)h >> 62);
+ 
     return *(uint64_t*)h;
   }
 };
@@ -367,7 +373,7 @@ public:
     h[0] = h[1] = this->getCRC32(base, keyByteLength, this->s);
     h[0] += this->getCRC32C(base, keyByteLength, this->s);
     h[1] += this->getCRC32D(base, keyByteLength, this->s);
-
+ 
     return *(uint64_t*)h;
   }
 };

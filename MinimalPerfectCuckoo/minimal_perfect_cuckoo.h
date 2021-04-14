@@ -241,6 +241,8 @@ public:
     // of having same-bucket hashes is large.  We compromise for those
     // uses by having a larger static starting size.
     num_buckets += 32;
+    /* To avoid the modulo operation in ASIC, let num_buckets to be 2^N */
+    num_buckets = pow(2, (int)ceil(log(num_buckets)/log(2)));
 
     if (num_buckets >= (1 << 30)) {
       throw runtime_error("Current design only support up to 4 billion key set size! ");
