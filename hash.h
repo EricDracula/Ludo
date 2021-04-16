@@ -295,6 +295,8 @@ public:
     h[0] ^= this->getCRC32C(base, keyByteLength, this->s);
     h[1] ^= this->getCRC32D(base, keyByteLength, this->s);
  
+    // printf("Bucket Index - Key: 0x%08x, Seed: 0x%08x, Hash: 0x%016lx\n", k0, this->s, *(uint64_t*)h);
+ 
     return *(uint64_t*)h;
   }
 };
@@ -346,8 +348,7 @@ public:
     h[1] += this->getCRC32C(base, keyByteLength, this->s);
     h[1] += this->getCRC32D(base, keyByteLength, this->s);
  
-    if (k0 == 0x0101a8c0)
-      printf("Slot Locator - Key: 0x%08x, Seed: 0x%08x, Hash: 0x%016lx, Slot: %lu\n", k0, this->s, *(uint64_t*)h, *(uint64_t*)h >> 62);
+    // printf("Slot Locator - Key: 0x%08x, Seed: 0x%08x, Hash: 0x%016lx, Slot: %lu\n", k0, this->s, *(uint64_t*)h, *(uint64_t*)h >> 62);
  
     return *(uint64_t*)h;
   }
@@ -373,6 +374,8 @@ public:
     h[0] = h[1] = this->getCRC32(base, keyByteLength, this->s);
     h[0] += this->getCRC32C(base, keyByteLength, this->s);
     h[1] += this->getCRC32D(base, keyByteLength, this->s);
+ 
+    // printf("Bucket Locator - Key: 0x%08x, Seed: 0x%08x, Hash: 0x%016lx\n", k0, this->s, *(uint64_t*)h);
  
     return *(uint64_t*)h;
   }

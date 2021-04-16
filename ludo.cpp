@@ -9,60 +9,45 @@
 #include "ludo.h"
 #include "MinimalPerfectCuckoo/minimal_perfect_cuckoo.h"
 
-#define Vlen 8
+void ludo(Key* keys, Val* values, uint32_t entryCount, uint32_t ludoSize, ExportLudo* exportLudo) {
+    ControlPlaneMinimalPerfectCuckoo<Key, Val, Vlen> cp(ludoSize);
 
-typedef uint32_t Key;
-// typedef uint8_t Key;
-typedef uint8_t Val;
-
-void ludo() {
-// int main(int argc, char **argv) {
-    // srand((unsigned)time(NULL));
-    ControlPlaneMinimalPerfectCuckoo<Key, Val, Vlen> cp(256);
-    Key k = 128;
-    Val v = 0;
-
-    /*
-    cp.insert(1, 0);
-    cp.insert(10, 1);
-    cp.insert(100, 2);
-    cp.insert(1000, 3);
-    cp.insert(10000, 4);
-    cp.insert(100000, 5);
-    */
-    for (int i = 0; i <= 255; i++) {
-        cp.insert(i, i);
+    for (int idx = 0; idx < entryCount; idx++) {
+        cp.insert(keys[idx], values[idx]);
     }
-
-    cp.insert(0x0101a8c0, 66);
 
     cp.prepareToExport();
 
-    DataPlaneMinimalPerfectCuckoo<Key, Val, Vlen> dp(cp);
+    DataPlaneMinimalPerfectCuckoo<Key, Val, Vlen> dp(cp, &exportLudo->bucket_seeds, &exportLudo->buckets);
+    exportLudo->bucket_index_seed = dp.h.s & 0xFF;
+    exportLudo->bucket_locator_seed = dp.locator.hab.s & 0xFF;
+    exportLudo->bucket_locator_a_len = dp.locator.ma;
+    exportLudo->bucket_locator_b_len = dp.locator.mb;
+    exportLudo->bucket_num = dp.num_buckets_;
 
     printf("Bucket number: %u\n", dp.num_buckets_);
     printf("Cuckoo seed: 0x%02hx\n", *((uint8_t *)&dp.h.s));
     printf("Othello seed: 0x%02hx\n", *((uint8_t *)&dp.locator.hab.s));
 
-    uint32_t checksum = 0;
-    for (int idx = 0; idx < dp.num_buckets_; idx++) {
-        DataPlaneMinimalPerfectCuckoo<Key, Val, Vlen>::Bucket bucket;
-        bucket = dp.readBucket(idx);
-        printf(
-            "Bucket %5d -- Seed: 0x%02x -- Slots: %5u%5u%5u%5u\n", idx, bucket.seed,
-            bucket.values[0], bucket.values[1], bucket.values[2], bucket.values[3]
-        );
-        checksum += bucket.values[0];
-        checksum += bucket.values[1];
-        checksum += bucket.values[2];
-        checksum += bucket.values[3];
-    }
-    printf("Checksum: %u\n", checksum);
-    
-    printf("Othello Bitarray A Len: %d\n", dp.locator.ma);
-    printf("Othello Bitarray B Len: %d\n", dp.locator.mb);
-    dp.lookUp(k, v);
-    printf("LookUp Test: Key %u - Value %u\n", k, v);
-
-    // return 0;
+    /*
+     * uint32_t checksum = 0;
+     * for (int idx = 0; idx < dp.num_buckets_; idx++) {
+     *     DataPlaneMinimalPerfectCuckoo<Key, Val, Vlen>::Bucket bucket;
+     *     bucket = dp.readBucket(idx);
+     *     printf(
+     *         "Bucket %5d -- Seed: 0x%02x -- Slots: %5u%5u%5u%5u\n", idx, bucket.seed,
+     *         bucket.values[0], bucket.values[1], bucket.values[2], bucket.values[3]
+     *     );
+     *     checksum += bucket.values[0];
+     *     checksum += bucket.values[1];
+     *     checksum += bucket.values[2];
+     *     checksum += bucket.values[3];
+     * }
+     * printf("Checksum: %u\n", checksum);
+     * 
+     * printf("Othello Bitarray A Len: %d\n", dp.locator.ma);
+     * printf("Othello Bitarray B Len: %d\n", dp.locator.mb);
+     * // dp.lookUp(k, v);
+     * // printf("LookUp Test: Key %u - Value %u\n", k, v);
+     */
 }

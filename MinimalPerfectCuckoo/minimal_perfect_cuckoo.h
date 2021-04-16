@@ -851,6 +851,46 @@ public:
     }
   }
 
+  explicit DataPlaneMinimalPerfectCuckoo(const ControlPlaneMinimalPerfectCuckoo<Key, Value, VL, DL> &cp, uint8_t **exportBucketSeeds, uint32_t **exportBuckets)
+    : num_buckets_(cp.buckets_.size()), h(cp.h), locator(cp.locator), overflow(cp.entryCount * 0.012),
+      digestH(cp.digestH) {
+
+    /* Export to other C programms */
+    *exportBucketSeeds = (uint8_t *)malloc(num_buckets_ * sizeof(uint8_t));
+    *exportBuckets = (uint32_t *)malloc(num_buckets_ * sizeof(uint32_t));
+
+    memset(*exportBucketSeeds , 0, num_buckets_ * sizeof(uint8_t));
+    memset(*exportBuckets, 0, num_buckets_ * sizeof(uint32_t));
+
+    resetMemory();
+
+    for (uint32_t bktIdx = 0; bktIdx < num_buckets_; ++bktIdx) {
+      const typename ControlPlaneMinimalPerfectCuckoo<Key, Value, VL>::Bucket &cpBucket = cp.buckets_[bktIdx];
+      Bucket dpBucket;
+      dpBucket.seed = cpBucket.seed > MaxArrangementSeed ? MaxArrangementSeed : cpBucket.seed;
+      /* Do not consider overflow seeds currently */
+      (*exportBucketSeeds)[bktIdx] = cpBucket.seed;
+      memset(dpBucket.values, 0, kSlotsPerBucket * sizeof(Value));
+
+      if (cpBucket.seed >= MaxArrangementSeed) {
+        overflow.insert(bktIdx, cpBucket.seed);
+      }
+
+      const FastHasher64<Key> locateHash(cpBucket.seed);
+
+      for (char slot = 0; slot < kSlotsPerBucket; ++slot) {
+        if (cpBucket.occupiedMask & (1U << slot)) {
+          const Key &k = cpBucket.keys[slot];
+          dpBucket.values[locateHash(k) >> 62] = cpBucket.values[slot];
+          /* Export to other C programms */
+          ((uint8_t *)&((*exportBuckets)[bktIdx]))[locateHash(k) >> 62] = cpBucket.values[slot];
+        }
+      }
+
+      writeBucket(dpBucket, bktIdx);
+    }
+  }
+
   template<class V2>
   DataPlaneMinimalPerfectCuckoo(const ControlPlaneMinimalPerfectCuckoo<Key, V2, VL, DL> &cp, unordered_map<V2, Value> m)
     : num_buckets_(cp.buckets_.size()), h(cp.h), locator(cp.locator),
