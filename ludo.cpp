@@ -25,11 +25,11 @@ void ludo(Key* keys, Val* values, uint32_t entryCount, uint32_t ludoSize, Export
     exportLudo->bucket_locator_b_len = dp.locator.mb;
     exportLudo->bucket_num = dp.num_buckets_;
 
-    printf("Bucket number: %u\n", dp.num_buckets_);
-    printf("Cuckoo seed: 0x%02hx\n", *((uint8_t *)&dp.h.s));
-    printf("Othello seed: 0x%02hx\n", *((uint8_t *)&dp.locator.hab.s));
-
     /*
+     * printf("Bucket number: %u\n", dp.num_buckets_);
+     * printf("Cuckoo seed: 0x%02hx\n", *((uint8_t *)&dp.h.s));
+     * printf("Othello seed: 0x%02hx\n", *((uint8_t *)&dp.locator.hab.s));
+
      * uint32_t checksum = 0;
      * for (int idx = 0; idx < dp.num_buckets_; idx++) {
      *     DataPlaneMinimalPerfectCuckoo<Key, Val, Vlen>::Bucket bucket;
