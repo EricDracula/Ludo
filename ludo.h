@@ -22,11 +22,14 @@ typedef struct ExportLudo {
     uint32_t  bucket_locator_a_len;
     uint32_t  bucket_locator_b_len;
     uint8_t   bucket_locator_seed;
+    uint64_t* bucket_locator;
     uint8_t*  bucket_seeds;
     uint32_t* buckets;
 } ExportLudo;
 
-extern "C"
-void ludo(Key* keys, Val* values, uint32_t entryCount, uint32_t ludoSize, ExportLudo* exportLudo);
+extern "C" {
+void ludo_construct(Key* keys, Val* values, uint32_t entryCount, 
+                    uint32_t ludoSize, ExportLudo* exportLudo);
+}
 
 #endif

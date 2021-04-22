@@ -851,18 +851,22 @@ public:
     }
   }
 
-  explicit DataPlaneMinimalPerfectCuckoo(const ControlPlaneMinimalPerfectCuckoo<Key, Value, VL, DL> &cp, uint8_t **exportBucketSeeds, uint32_t **exportBuckets)
+  explicit DataPlaneMinimalPerfectCuckoo(const ControlPlaneMinimalPerfectCuckoo<Key, Value, VL, DL> &cp, uint64_t **exportBucketLocator, uint8_t **exportBucketSeeds, uint32_t **exportBuckets)
     : num_buckets_(cp.buckets_.size()), h(cp.h), locator(cp.locator), overflow(cp.entryCount * 0.012),
       digestH(cp.digestH) {
 
     /* Export to other C programms */
+    *exportBucketLocator = (uint64_t *)malloc(locator.mem.size() * sizeof(uint64_t));
     *exportBucketSeeds = (uint8_t *)malloc(num_buckets_ * sizeof(uint8_t));
     *exportBuckets = (uint32_t *)malloc(num_buckets_ * sizeof(uint32_t));
 
-    memset(*exportBucketSeeds , 0, num_buckets_ * sizeof(uint8_t));
+    memset(*exportBucketLocator, 0, locator.mem.size() * sizeof(uint64_t));
+    memset(*exportBucketSeeds, 0, num_buckets_ * sizeof(uint8_t));
     memset(*exportBuckets, 0, num_buckets_ * sizeof(uint32_t));
 
     resetMemory();
+
+    std::copy(locator.mem.begin(), locator.mem.end(), *exportBucketLocator);
 
     for (uint32_t bktIdx = 0; bktIdx < num_buckets_; ++bktIdx) {
       const typename ControlPlaneMinimalPerfectCuckoo<Key, Value, VL>::Bucket &cpBucket = cp.buckets_[bktIdx];

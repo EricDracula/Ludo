@@ -9,7 +9,9 @@
 #include "ludo.h"
 #include "MinimalPerfectCuckoo/minimal_perfect_cuckoo.h"
 
-void ludo(Key* keys, Val* values, uint32_t entryCount, uint32_t ludoSize, ExportLudo* exportLudo) {
+void ludo_construct(Key* keys, Val* values, uint32_t entryCount, 
+                    uint32_t ludoSize, ExportLudo* exportLudo) {
+
     ControlPlaneMinimalPerfectCuckoo<Key, Val, Vlen> cp(ludoSize);
 
     for (int idx = 0; idx < entryCount; idx++) {
@@ -18,7 +20,10 @@ void ludo(Key* keys, Val* values, uint32_t entryCount, uint32_t ludoSize, Export
 
     cp.prepareToExport();
 
-    DataPlaneMinimalPerfectCuckoo<Key, Val, Vlen> dp(cp, &exportLudo->bucket_seeds, &exportLudo->buckets);
+    DataPlaneMinimalPerfectCuckoo<Key, Val, Vlen> dp(
+        cp, &exportLudo->bucket_locator, 
+        &exportLudo->bucket_seeds, &exportLudo->buckets
+    );
     exportLudo->bucket_index_seed = dp.h.s & 0xFF;
     exportLudo->bucket_locator_seed = dp.locator.hab.s & 0xFF;
     exportLudo->bucket_locator_a_len = dp.locator.ma;
