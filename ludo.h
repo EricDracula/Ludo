@@ -27,9 +27,8 @@ typedef struct ExportLudo {
     uint32_t* buckets;
 } ExportLudo;
 
-extern "C" {
+extern "C"
 void ludo_construct(Key* keys, Val* values, uint32_t entryCount, 
                     uint32_t ludoSize, ExportLudo* exportLudo);
-}
 
 #endif
